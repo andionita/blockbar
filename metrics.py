@@ -87,6 +87,7 @@ while True:
     happypath = happypath.append(row)
     current_node = row['To_node_label']
     happy_nodes.append(current_node)
+happypath['count'] = '#' + happypath['count'].astype(str)
 # draw graph
 #print('happy nodes')
 #print(happy_nodes)
@@ -97,6 +98,7 @@ for node in happy_nodes:
     happy_dict[node] = address_labels[address_labels.node_label == node].Address.values.tolist()[0]
 print('happy dict')
 print(happy_dict)
+happy_color = ['red', 'blue', 'brown', 'yellow','green']
 happy_labels = address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist()
 dg = nx.from_pandas_edgelist(
         df=happypath,
@@ -106,9 +108,13 @@ dg = nx.from_pandas_edgelist(
         create_using=nx.DiGraph()
     )
 pos = nx.spring_layout(dg)
-nx.draw_networkx(dg, pos, node_size=800, labels=happy_dict)
-#nx.draw_networkx_nodes(dg, pos, labels=)
+nx.draw_networkx(dg, pos, with_labels=False, arrowsize=20)
+node_index = 0
+for node in happy_nodes:
+    nx.draw_networkx_nodes(dg, pos, node_size=600, node_color=happy_color[node_index], nodelist=[node], label=happy_dict[node])
+    node_index += 1
 nx.draw_networkx_edge_labels(dg, pos=pos, edge_labels=nx.get_edge_attributes(dg, 'count'))
+plt.legend(scatterpoints = 1)
 plt.show()
 
 # Detect loops
