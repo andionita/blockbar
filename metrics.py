@@ -78,6 +78,7 @@ edgelist = edgelist.sort_values(['From_node_label', 'count'], ascending=[True, F
 # build happy bath
 happypath = pd.DataFrame(columns=['From_node_label', 'To_node_label', 'count'])
 current_node = 0
+happy_nodes = [0]
 while True:
     if len(edgelist[edgelist.From_node_label == current_node]) > 0:
         row = edgelist[edgelist.From_node_label == current_node].iloc[0]
@@ -85,7 +86,18 @@ while True:
         break
     happypath = happypath.append(row)
     current_node = row['To_node_label']
+    happy_nodes.append(current_node)
 # draw graph
+#print('happy nodes')
+#print(happy_nodes)
+#print('address labels')
+#print(address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist())
+happy_dict = {}
+for node in happy_nodes:
+    happy_dict[node] = address_labels[address_labels.node_label == node].Address.values.tolist()[0]
+print('happy dict')
+print(happy_dict)
+happy_labels = address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist()
 dg = nx.from_pandas_edgelist(
         df=happypath,
         source='From_node_label',
@@ -94,7 +106,8 @@ dg = nx.from_pandas_edgelist(
         create_using=nx.DiGraph()
     )
 pos = nx.spring_layout(dg)
-nx.draw_networkx(dg, pos, node_size=800)
+nx.draw_networkx(dg, pos, node_size=800, labels=happy_dict)
+#nx.draw_networkx_nodes(dg, pos, labels=)
 nx.draw_networkx_edge_labels(dg, pos=pos, edge_labels=nx.get_edge_attributes(dg, 'count'))
 plt.show()
 
