@@ -13,7 +13,7 @@ IN_DEGREES_FILE='data/Out_degrees.csv'
 OUT_DEGREES_FILE='data/In_degrees.csv'
 all_tx = pd.read_csv(INPUT_CSV, sep=';')
 # Limiting the number of transaction to the first 1000, otherwise the resulting graph is unreadable
-all_tx = all_tx[:1000]
+#all_tx = all_tx[:5000]
 
 # Relabeling Data
 all_tx_copy = all_tx.copy()
@@ -34,6 +34,10 @@ all_tx_labels_copy = all_tx_labels.copy()
 edgelist = all_tx_labels_copy.drop(columns=['Txhash', 'UnixTimestamp', 'From', 'To', 'Token_ID', 'Method'])
 edgelist['count'] = 0
 edgelist = edgelist.groupby(['From_node_label', 'To_node_label'])['count'].count().reset_index(name='count')
+print('original no of rows: ' + str(len(edgelist)))
+edgelist = edgelist[edgelist['count'] > 3]
+edgelist = edgelist[(edgelist['From_node_label'] != 1509) & (edgelist['From_node_label'] != 309) & (edgelist['From_node_label'] != 1123)]
+print('after filtering: ' + str(len(edgelist)))
 edgelist['count'] = edgelist['count'].apply(lambda x: float(numpy.math.log(1 + x, 5)))
 dg = nx.from_pandas_edgelist(
     df=edgelist,
@@ -49,6 +53,9 @@ counts = [dg[u][v]['count'] for u,v in edges]
 
 pos = nx.spring_layout(dg)
 #pos = nx.nx_agraph.graphviz_layout(dg)
-nx.draw_networkx(dg, pos, width=counts)
+nx.draw_networkx(dg, pos, width=counts,
+                 node_size=800,
+                 connectionstyle='arc3, rad = 0.05',
+                 arrowsize=15)
 
 plt.show()

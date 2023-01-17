@@ -94,7 +94,7 @@ dg = nx.from_pandas_edgelist(
         create_using=nx.DiGraph()
     )
 pos = nx.spring_layout(dg)
-nx.draw_networkx(dg, pos)
+nx.draw_networkx(dg, pos, node_size=800)
 nx.draw_networkx_edge_labels(dg, pos=pos, edge_labels=nx.get_edge_attributes(dg, 'count'))
 plt.show()
 
