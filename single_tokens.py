@@ -23,10 +23,21 @@ all_tx_labels = all_tx_copy.merge(address_labels, how='left', left_on='From', ri
 all_tx_labels = all_tx_labels.merge(address_labels, how='left', left_on='To', right_on='Address').rename(columns={'node_label':'To_node_label'})
 all_tx_labels.drop(columns=['Address_x', 'Address_y'], axis=1, inplace=True)
 
-token_ids = all_tx_copy['Token_ID'].unique()
-#for i in range(0, len(token_ids)):
-for i in range(0, 10):
+#fig, axes = plt.subplots(nrows=2, ncols=2)
+#ax = axes.flatten()
+
+#token_ids = all_tx_copy['Token_ID'].unique()
+# token in loops
+#token_ids = [287, 392, 395, 501]
+#token_ids = [533, 561, 592, 610]
+#token_ids = [612, 654, 669, 703]
+#token_ids = [669, 703, 1454, 5650]
+# token in sales
+token_ids = [5131]
+for i in range(0, len(token_ids)):
+#for i in range(0, 10):
     all_tx_labels_token = all_tx_labels[all_tx_labels['Token_ID'] == token_ids[i]]
+    #all_tx_labels_token = all_tx_labels[all_tx_labels['Token_ID'] == 287]
     print("edges count = " + str(len(all_tx_labels_token)))
     #if len(all_tx_labels_token) < 6:
     #    continue
@@ -39,18 +50,14 @@ for i in range(0, 10):
         create_using=nx.DiGraph()
     )
     pos = nx.spring_layout(DG)
-    nx.draw(G=DG,
-            pos=pos,
-            node_size=800,
-            width=1.5,
-            arrowsize=15,
-            with_labels=True,
-            connectionstyle='arc3, rad = 0.05')
-    nx.draw_networkx_labels(G=DG, pos=pos)
+    nx.draw_networkx(DG, pos,
+                    #ax=ax[i],
+                    connectionstyle='arc3, rad = 0.05', node_size=800, arrowsize=15, width=1.5)
     nx.draw_networkx_edge_labels(
         DG,
         pos=pos,
-        edge_labels=nx.get_edge_attributes(DG,'Token_ID')
+        #ax=ax[i],
+        edge_labels=nx.get_edge_attributes(DG,'Token_ID'), font_size=12
         )
-    plt.title('Token_ID = ' + str(i))
-    plt.show()
+    #ax[i].set_axis_off()
+plt.show()
