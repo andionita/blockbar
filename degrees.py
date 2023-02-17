@@ -20,6 +20,13 @@ address_labels = pd.concat([addresses, node_labels], axis=1).loc[:, ['Address', 
 all_tx_labels = all_tx_copy.merge(address_labels, how='left', left_on='From', right_on='Address').rename(columns={'node_label':'From_node_label'})
 all_tx_labels = all_tx_labels.merge(address_labels, how='left', left_on='To', right_on='Address').rename(columns={'node_label':'To_node_label'})
 all_tx_labels.drop(columns=['Address_x', 'Address_y'], axis=1, inplace=True)
+#print(all_tx_labels.loc[all_tx_labels['From_node_label'] == 532, 'From'])
+#pd.set_option('display.max_columns', None)
+#print(all_tx_labels[['From_node_label', 'From']])
+#print(all_tx_labels.columns)
+from_label_map = dict(zip(all_tx_labels['From_node_label'], all_tx_labels['From']))
+to_label_map = dict(zip(all_tx_labels['To_node_label'], all_tx_labels['To']))
+print(to_label_map)
 
 DG = nx.from_pandas_edgelist(
     df=all_tx_labels,
@@ -32,7 +39,6 @@ DG = nx.from_pandas_edgelist(
 degrees = sorted((d for n, d in DG.out_degree()), reverse=True)
 #degrees = sorted((d for n, d in DG.in_degree()), reverse=True)
 print(degrees)
-#print(nx.in_degree_centrality(DG))
 
 fig, ax = plt.subplots(figsize=[5, 4])
 ax.plot(*np.unique(degrees, return_counts=True))
