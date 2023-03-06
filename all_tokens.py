@@ -22,7 +22,6 @@ all_tx_from = all_tx_copy.loc[:, ['From', 'UnixTimestamp']].rename(columns={'Fro
 all_tx_to = all_tx_copy.loc[:, ['To', 'UnixTimestamp']].rename(columns={'To':'Address'})
 addresses = pd.concat([all_tx_from, all_tx_to]).groupby('Address').agg('min').sort_values('UnixTimestamp', ascending=True).reset_index()
 # Code reference: https://stackoverflow.com/questions/50860366/pandas-set-row-values-to-letter-of-the-alphabet-corresponding-to-index-number
-# index to upper letter
 node_labels = pd.Series(list(addresses.index.values), name='node_label')
 address_labels = pd.concat([addresses, node_labels], axis=1).loc[:, ['Address', 'node_label']]
 # save address labels to CSV file
