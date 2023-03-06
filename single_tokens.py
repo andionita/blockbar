@@ -1,5 +1,6 @@
 '''
 Represent the transfer history of single tokens as directed graphs
+Outcome: graphs with loops
 '''
 import networkx as nx
 import matplotlib.pyplot as plt
