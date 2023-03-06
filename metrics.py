@@ -14,15 +14,13 @@ import numpy
 # read in data
 INPUT_CSV='data/export-token-nft-0x9db475371b5cc2913d3219f72e16a3f101339a05_von_anfang_bis_20122022_concise.csv'
 all_tx = pd.read_csv(INPUT_CSV, sep=';')
-#all_tx = all_tx[:1000]
 
-# Relabelling data
+# Relabeling data
 all_tx_copy = all_tx.copy()
 all_tx_from = all_tx_copy.loc[:, ['From', 'UnixTimestamp']].rename(columns={'From':'Address'})
 all_tx_to = all_tx_copy.loc[:, ['To', 'UnixTimestamp']].rename(columns={'To':'Address'})
 addresses = pd.concat([all_tx_from, all_tx_to]).groupby('Address').agg('min').sort_values('UnixTimestamp', ascending=True).reset_index()
-# https://stackoverflow.com/questions/50860366/pandas-set-row-values-to-letter-of-the-alphabet-corresponding-to-index-number
-# index to upper letter
+# Code reference: https://stackoverflow.com/questions/50860366/pandas-set-row-values-to-letter-of-the-alphabet-corresponding-to-index-number
 node_labels = pd.Series(list(addresses.index.values), name='node_label')
 address_labels = pd.concat([addresses, node_labels], axis=1).loc[:, ['Address', 'node_label']]
 # save address labels to CSV file
@@ -96,9 +94,9 @@ happypath['count'] = '#' + happypath['count'].astype(str)
 happy_dict = {}
 for node in happy_nodes:
     happy_dict[node] = address_labels[address_labels.node_label == node].Address.values.tolist()[0]
-print('happy dict')
+print('happy dict (nodes part of the happy path as label:address ):')
 print(happy_dict)
-happy_color = ['red', 'blue', 'brown', 'yellow','green']
+happy_color = ['red', 'brown', 'yellow','green', 'blue']
 happy_labels = address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist()
 dg = nx.from_pandas_edgelist(
         df=happypath,
@@ -106,15 +104,15 @@ dg = nx.from_pandas_edgelist(
         target='To_node_label',
         edge_attr='count',
         create_using=nx.DiGraph()
+        #create_using=nx.Graph()
     )
 pos = nx.spring_layout(dg)
-nx.draw_networkx(dg, pos, with_labels=False, arrowsize=20)
+nx.draw_networkx(dg, pos, with_labels=False, arrowsize=50)
 node_index = 0
 for node in happy_nodes:
-    nx.draw_networkx_nodes(dg, pos, node_size=600, node_color=happy_color[node_index], nodelist=[node], label=happy_dict[node])
+    nx.draw_networkx_nodes(dg, pos, node_size=1200, node_color=happy_color[node_index], nodelist=[node], label=happy_dict[node])
     node_index += 1
-nx.draw_networkx_edge_labels(dg, pos=pos, edge_labels=nx.get_edge_attributes(dg, 'count'))
-plt.legend(scatterpoints = 1)
+nx.draw_networkx_edge_labels(dg, pos=pos, edge_labels=nx.get_edge_attributes(dg, 'count'), font_size=16)
 plt.show()
 
 # Detect loops
@@ -124,7 +122,7 @@ loopdf['loop_count'] = 0
 loopdf = loopdf.groupby(['To_node_label', 'Token_ID'])['loop_count'].count().reset_index(name='loop_count')
 loopdf = loopdf[loopdf.loop_count > 1]
 loopdf = loopdf.sort_values(['loop_count', 'Token_ID'], ascending=[False, True])
-# print out nodes that are visited more times per token
+print('nodes that are visited more times per token (are part of a loop):')
 print(loopdf)
 
 # Computing Token retention time
