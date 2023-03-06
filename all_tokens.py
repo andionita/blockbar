@@ -1,5 +1,6 @@
 '''
 Represent the transfer history of all tokens as a graph
+Outcome: Thickness graph
 '''
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -20,7 +21,7 @@ all_tx_copy = all_tx.copy()
 all_tx_from = all_tx_copy.loc[:, ['From', 'UnixTimestamp']].rename(columns={'From':'Address'})
 all_tx_to = all_tx_copy.loc[:, ['To', 'UnixTimestamp']].rename(columns={'To':'Address'})
 addresses = pd.concat([all_tx_from, all_tx_to]).groupby('Address').agg('min').sort_values('UnixTimestamp', ascending=True).reset_index()
-# https://stackoverflow.com/questions/50860366/pandas-set-row-values-to-letter-of-the-alphabet-corresponding-to-index-number
+# Code reference: https://stackoverflow.com/questions/50860366/pandas-set-row-values-to-letter-of-the-alphabet-corresponding-to-index-number
 # index to upper letter
 node_labels = pd.Series(list(addresses.index.values), name='node_label')
 address_labels = pd.concat([addresses, node_labels], axis=1).loc[:, ['Address', 'node_label']]
@@ -29,16 +30,25 @@ address_labels = pd.concat([addresses, node_labels], axis=1).loc[:, ['Address', 
 all_tx_labels = all_tx_copy.merge(address_labels, how='left', left_on='From', right_on='Address').rename(columns={'node_label':'From_node_label'})
 all_tx_labels = all_tx_labels.merge(address_labels, how='left', left_on='To', right_on='Address').rename(columns={'node_label':'To_node_label'})
 all_tx_labels.drop(columns=['Address_x', 'Address_y'], axis=1, inplace=True)
-
 all_tx_labels_copy = all_tx_labels.copy()
 edgelist = all_tx_labels_copy.drop(columns=['Txhash', 'UnixTimestamp', 'From', 'To', 'Token_ID', 'Method'])
+
+# computing counts as edge weight
 edgelist['count'] = 0
 edgelist = edgelist.groupby(['From_node_label', 'To_node_label'])['count'].count().reset_index(name='count')
 print('original no of rows: ' + str(len(edgelist)))
+
+# filtering graph, removing edges with low edge weight, removing specific nodes outside of main connected component
 edgelist = edgelist[edgelist['count'] > 3]
-edgelist = edgelist[(edgelist['From_node_label'] != 1509) & (edgelist['From_node_label'] != 309) & (edgelist['From_node_label'] != 1123)]
+edgelist = edgelist[(edgelist['From_node_label'] != 1509) & (edgelist['From_node_label'] != 309) &
+                    (edgelist['From_node_label'] != 1123) & (edgelist['From_node_label'] != 1913) &
+                    (edgelist['From_node_label'] != 245)]
 print('after filtering: ' + str(len(edgelist)))
+
+# using log scala for counts
 edgelist['count'] = edgelist['count'].apply(lambda x: float(numpy.math.log(1 + x, 5)))
+
+# constructing graph and rendering it
 dg = nx.from_pandas_edgelist(
     df=edgelist,
     source='From_node_label',
