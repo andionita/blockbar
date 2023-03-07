@@ -38,7 +38,7 @@ edgelist = edgelist.groupby(['From_node_label', 'To_node_label'])['count'].count
 print('original no of rows: ' + str(len(edgelist)))
 
 # filtering graph, removing edges with low edge weight, removing specific nodes outside of main connected component
-edgelist = edgelist[edgelist['count'] > 3]
+edgelist = edgelist[edgelist['count'] > 5]
 edgelist = edgelist[(edgelist['From_node_label'] != 1509) & (edgelist['From_node_label'] != 309) &
                     (edgelist['From_node_label'] != 1123) & (edgelist['From_node_label'] != 1913) &
                     (edgelist['From_node_label'] != 245)]
