@@ -72,8 +72,9 @@ all_tx_labels_copy = all_tx_labels.copy()
 edgelist = all_tx_labels_copy.drop(columns=['Txhash', 'UnixTimestamp', 'From', 'To', 'Token_ID', 'Method'])
 edgelist['count'] = 0
 edgelist = edgelist.groupby(['From_node_label', 'To_node_label'])['count'].count().reset_index(name='count')
+# sort edge weights in decreasing order
 edgelist = edgelist.sort_values(['From_node_label', 'count'], ascending=[True, False])
-# build happy bath
+# build happy path
 happypath = pd.DataFrame(columns=['From_node_label', 'To_node_label', 'count'])
 current_node = 0
 happy_nodes = [0]
@@ -87,14 +88,14 @@ while True:
     happy_nodes.append(current_node)
 happypath['count'] = '#' + happypath['count'].astype(str)
 # draw graph
-#print('happy nodes')
-#print(happy_nodes)
-#print('address labels')
-#print(address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist())
+print('happy nodes')
+print(happy_nodes)
+print('happy nodes address labels')
+print(address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist())
 happy_dict = {}
 for node in happy_nodes:
     happy_dict[node] = address_labels[address_labels.node_label == node].Address.values.tolist()[0]
-print('happy dict (nodes part of the happy path as label:address ):')
+print('happy dict (nodes part of the happy path as label:address):')
 print(happy_dict)
 happy_color = ['red', 'brown', 'yellow','green', 'blue']
 happy_labels = address_labels[address_labels.node_label.isin(happy_nodes)].Address.values.tolist()
